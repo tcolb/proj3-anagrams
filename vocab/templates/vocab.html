@@ -100,54 +100,51 @@
 
 <p id="msg" class="message"></p>
 
- </div> <!-- container -->
+</div> <!-- container -->
 
- <script>
+<script>
 
- // Supress normal form submission
- //$("#entry").submit( function(event) {
-//  event.preventDefault();
-// });
+  // Supress normal form submission
+  $("#entry").submit( function(event) {
+    event.preventDefault();
+  });
 
- $("#attempt").keyup(function (event) {
-  var txt = $("#attempt").val();
-  var key = event.which;
-  var letter = String.fromCharCode(key);
-  // Keycodes found from https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
-  var allowedKeys = [8, 9, 13, 16, 17, 18, 27, 37, 38, 39, 40, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123];
+  $("#attempt").keyup(function (event) {
+    var txt = $("#attempt").val();
+    var key = event.which;
+    var letter = String.fromCharCode(key);
+    // Keycodes found from https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+    var allowedKeys = [8, 9, 13, 16, 17, 18, 27, 37, 38, 39, 40, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123];
 
-  if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(letter) || key == 8) {
-    var data = $("#entry").serialize();
+    // Check if key pressed is in alphabet or is backspace
+    if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(letter) || key == 8) {
+      var data = $("#entry").serialize();
 
-    // https://stackoverflow.com/questions/6611249/jquery-ajax-and-redirect-response-from-server/6611964#6611964
-    // Credit to picus
+      // https://stackoverflow.com/questions/6611249/jquery-ajax-and-redirect-response-from-server/6611964#6611964
+      // Credit to picus
 
-    $.ajax({
-      type: 'POST',
-      url: "/_check",
-      data: data,
-      success: function(ret) {
-        if (ret.complete) { // Check JSON to see if client should be redirected
-          window.location.replace(ret.response);
-        } else { // Client should only be displayed error message
-          $("#msg").text(ret.response);
-        }
+      // Create AJAX call, using post
+      $.ajax({
+        type: 'POST',
+        url: "/_check",
+        data: data,
+        success: function(ret) {
+          if (ret.complete) { // Check JSON to see if client should be redirected
+            window.location.replace(ret.response);
+          } else { // Client should only be displayed error message
+            $("#msg").text(ret.response);
+          }}
+        });
+
+      // If the key is not in the allowed keys (modifiers, arrow keys, etc) then delete it  
+      } else if ($.inArray(key, allowedKeys) == -1) {
+        // https://stackoverflow.com/questions/6891402/delete-last-character-from-input
+        // Credit to mrchief
+
+        // Slice to same string but with one less letter
+        $("#attempt").val($("#attempt").val().slice(0, -1));
       }
-    });
-  } else if ($.inArray(key, allowedKeys) == -1) {
-    // https://stackoverflow.com/questions/6891402/delete-last-character-from-input
-    // Credit to mrchief
-    $("#attempt").val($("#attempt").val().slice(0, -1));
-  }
-
-  /*
-  $.post("/_check", $("#entry").serialize())
-    .done( window.location.replace("/keep_going") );
-  */
-
-
-
- });
+  });
 
  </script>
 
