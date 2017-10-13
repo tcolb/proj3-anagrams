@@ -96,18 +96,21 @@ def check():
     matched = WORDS.has(text)
 
     # Choose page:  Solved enough, or keep going?
+    # Logic redone partially
     message = ""
     if matched and in_jumble and not (text in matches):
-        # Cool, they found a new word
+        # New word found
         matches.append(text)
         flask.session["matches"] = matches
 
         if len(matches) >= flask.session["target_count"]:
-            #return flask.redirect(flask.url_for("success"))
+            # Enough matches redirect to success
             return flask.jsonify(complete=True, response="/success")
         else:
+            # Not enough matches redirect to keep_going
             return flask.jsonify(complete=True, response="/keep_going")
 
+    # Show error message, don't redirect
     elif text in matches:
         message = "You already found {}".format(text)
     elif not matched:
@@ -118,6 +121,7 @@ def check():
         app.logger.debug("This case shouldn't happen!")
         assert False  # Raises AssertionErrorflash
 
+    # JSON showing that redirect should not be made, error message should be shown
     return flask.jsonify(complete=False, response=message)
 
 ###############
