@@ -70,7 +70,7 @@
   </div>
   </div><div class="row">
   <div class="col-xs-6 text-center lead">
-    <strong>{{ session.jumble }}</strong>
+    <span id="gram"><strong>{{ session.jumble }}</strong></span>
   </div>
   </div><div class="row">
   <div class="col-xs-6 text-center">
@@ -84,7 +84,6 @@
     <label for="attempt">Word:</label>
     <input id="attempt" name="attempt" type="text" width="15"
       autocomplete="off"  autofocus />
-    <input type="submit" name="try" />
   </form>
 </div></div>
 
@@ -94,22 +93,65 @@
 <h2>You found </h2>
 <p id="results">
   {% for match in session.matches %}
-  {{ match }} 
+  {{ match }}
   {% endfor %}
 </p>
 {% endif %}
 
-
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <!-- Mismatch, already found, etc. "flashed" from Python -->
-    {% for message in messages %}
-      <p class="message">{{ message }}</p>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
-
+<p id="msg" class="message"></p>
 
  </div> <!-- container -->
+
+ <script>
+
+ // Supress normal form submission
+ //$("#entry").submit( function(event) {
+//  event.preventDefault();
+// });
+
+ $("#attempt").keyup(function (event) {
+  var txt = $("#attempt").val();
+  var key = event.which;
+  var letter = String.fromCharCode(key);
+  // Keycodes found from https://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
+  var allowedKeys = [8, 9, 13, 16, 17, 18, 27, 37, 38, 39, 40, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123];
+
+  if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(letter) || key == 8) {
+    var data = $("#entry").serialize();
+
+    // https://stackoverflow.com/questions/6611249/jquery-ajax-and-redirect-response-from-server/6611964#6611964
+    // Credit to picus
+
+    if
+
+    $.ajax({
+      type: 'POST',
+      url: "/_check",
+      data: data,
+      success: function(ret) {
+        if (ret.complete) { // Check JSON to see if client should be redirected
+          window.location.replace(ret.response);
+        } else { // Client should only be displayed error message
+          $("#msg").text(ret.response);
+        }
+      }
+    });
+  } else if ($.inArray(key, allowedKeys) == -1) {
+    // https://stackoverflow.com/questions/6891402/delete-last-character-from-input
+    // Credit to mrchief
+    $("#attempt").val($("#attempt").val().slice(0, -1));
+  }
+
+  /*
+  $.post("/_check", $("#entry").serialize())
+    .done( window.location.replace("/keep_going") );
+  */
+
+
+
+ });
+
+ </script>
+
+
 </body> </html>
